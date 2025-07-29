@@ -1,6 +1,6 @@
 from typing import List, Annotated
 
-from fastapi import FastAPI, Depends, status, HTTPException
+from fastapi import FastAPI, Depends, status, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -94,7 +94,7 @@ async def create_checklist(checklist: ChecklistCreate, db: db_dependency):
     db.refresh(db_checklist)
     return db_checklist
 
-@app.put("/checklists/{checklist_id}/items", status_code = status.HTTP_200_OK, response_model = ItemResponse)
+@app.post("/checklists/{checklist_id}/items", status_code = status.HTTP_201_CREATED, response_model = ItemResponse)
 async def add_item_to_checklist(checklist_id: int, item: ItemCreate, db: db_dependency):
     db_checklist = db.query(models.Checklist).filter(models.Checklist.id == checklist_id).first()
     if not db_checklist:
@@ -105,10 +105,10 @@ async def add_item_to_checklist(checklist_id: int, item: ItemCreate, db: db_depe
         isComplete = item.isComplete,
         checklistId = checklist_id
     )
+    db_checklist.items.append(db_item)
 
-    db.add(db_item)
     db.commit()
-    db.refresh(db_item)
+    db.refresh(db_checklist)
     return db_item
 
 @app.delete("/checklists/{checklist_id}", status_code = status.HTTP_204_NO_CONTENT)
@@ -119,22 +119,33 @@ async def delete_checklist(checklist_id: int, db: db_dependency):
 
     db.delete(db_checklist)
     db.commit()
+    return Response(status_code = status.HTTP_204_NO_CONTENT)
 
-@app.get("/items", response_model = List[ItemResponse])
-async def get_items(db: db_dependency):
-    db_items = db.query(models.Item).all()
-    return db_items
+@app.get("/checklists/{checklist_id}/items", response_model = List[ItemResponse])
+async def get_items(checklist_id: int, db: db_dependency):
+    db_checklist = db.query(models.Checklist).filter(models.Checklist.id == checklist_id).first()
+    if not db_checklist:
+        raise HTTPException(status_code = 404, detail = "Checklist not found")
 
-@app.get("/items/{item_id}", response_model = ItemResponse)
-async def get_item(item_id: int, db: db_dependency):
-    db_item = db.query(models.Item).filter(models.Item.id == item_id).first()
+    items = db_checklist.items
+    return items
+
+@app.get("/checklists/{checklist_id}/items/{item_id}", response_model = ItemResponse)
+async def get_item(checklist_id: int, item_id: int, db: db_dependency):
+    db_item = (db.query(models.Item)
+               .filter(models.Item.checklistId == checklist_id, models.Item.id == item_id)
+               .first())
+
     if not db_item:
         raise HTTPException(status_code = 404, detail = "Item not found")
     return db_item
 
-@app.put("/items/{item_id}", status_code = status.HTTP_200_OK, response_model = ItemResponse)
-async def update_item(item_id: int, item: ItemBase, db: db_dependency):
-    db_item = db.query(models.Item).filter(models.Item.id == item_id).first()
+@app.put("/checklists/{checklist_id}/items/{item_id}", status_code = status.HTTP_200_OK, response_model = ItemResponse)
+async def update_item(checklist_id: int, item_id: int, item: ItemBase, db: db_dependency):
+    db_item = (db.query(models.Item)
+               .filter(models.Item.checklistId == checklist_id, models.Item.id == item_id)
+               .first())
+
     if not db_item:
         raise HTTPException(status_code = 404, detail = "Item not found")
 
@@ -145,11 +156,15 @@ async def update_item(item_id: int, item: ItemBase, db: db_dependency):
     db.refresh(db_item)
     return db_item
 
-@app.delete("/items/{item_id}", status_code = status.HTTP_204_NO_CONTENT)
-async def delete_item(item_id: int, db: db_dependency):
-    db_item = db.query(models.Item).filter(models.Item.id == item_id).first()
+@app.delete("/checklists/{checklist_id}/items/{item_id}", status_code = status.HTTP_204_NO_CONTENT)
+async def delete_item(checklist_id: int, item_id: int, db: db_dependency):
+    db_item = (db.query(models.Item)
+               .filter(models.Item.checklistId == checklist_id, models.Item.id == item_id)
+               .first())
+
     if not db_item:
         raise HTTPException(status_code = 404, detail = "Item not found")
 
     db.delete(db_item)
     db.commit()
+    return Response(status_code = status.HTTP_204_NO_CONTENT)
