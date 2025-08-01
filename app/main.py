@@ -1,12 +1,10 @@
 from typing import List, Annotated
-
 from fastapi import FastAPI, Depends, status, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-
-import models
-from database import engine, SessionLocal
+from app import models
+from app.database import engine, SessionLocal
 
 app = FastAPI()
 models.Base.metadata.create_all(bind = engine)

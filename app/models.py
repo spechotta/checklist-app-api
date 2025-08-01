@@ -1,7 +1,6 @@
 from sqlalchemy import Column, String, Boolean, Integer, ForeignKey
 from sqlalchemy.orm import relationship
-
-from database import Base
+from app.database import Base
 
 class Item(Base):
     __tablename__ = "items"
