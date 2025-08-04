@@ -33,7 +33,6 @@ Before running the application, please make sure these are installed:
 - **pip** (Python package manager)
 - **Python 3.10+**
 - **MySQL** 
-- An IDE such as **IntelliJ IDEA Ultimate** or **VS Code**
 
 ### Setup Instructions
 
@@ -73,5 +72,4 @@ Before running the application, please make sure these are installed:
 
 6. **Access the API documentation in your browser:**
 
-    - **Swagger UI**: http://localhost:8000/docs#
-   
+    - **Swagger UI**: http://localhost:8000/docs#   
