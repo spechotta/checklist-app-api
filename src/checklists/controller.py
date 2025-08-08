@@ -6,11 +6,11 @@ from src.dependencies import DbSession
 
 router = APIRouter(prefix = "/checklists", tags = ["Checklists"])
 
-@router.get("", response_model = List[ChecklistResponse])
+@router.get("", status_code = status.HTTP_200_OK, response_model = List[ChecklistResponse])
 def get_checklists(db: DbSession):
     return service.get_checklists(db)
 
-@router.get("/{checklist_id}", response_model = ChecklistResponse)
+@router.get("/{checklist_id}", status_code = status.HTTP_200_OK, response_model = ChecklistResponse)
 def get_checklist(checklist_id: int, db: DbSession):
     return service.get_checklist(checklist_id, db)
 
@@ -27,11 +27,11 @@ def delete_checklist(checklist_id: int, db: DbSession):
     service.delete_checklist(checklist_id, db)
     return Response(status_code = status.HTTP_204_NO_CONTENT)
 
-@router.get("/{checklist_id}/items", response_model = List[ItemResponse])
+@router.get("/{checklist_id}/items", status_code = status.HTTP_200_OK, response_model = List[ItemResponse])
 def get_items(checklist_id: int, db: DbSession):
     return service.get_items(checklist_id, db)
 
-@router.get("/{checklist_id}/items/{item_id}", response_model = ItemResponse)
+@router.get("/{checklist_id}/items/{item_id}", status_code = status.HTTP_200_OK, response_model = ItemResponse)
 def get_item(checklist_id: int, item_id: int, db: DbSession):
     return service.get_item(checklist_id, item_id, db)
 
