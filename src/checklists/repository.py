@@ -3,7 +3,6 @@ from src.checklists import models
 from src.checklists.models import Item, Checklist
 from src.checklists.schemas import ChecklistCreate, ItemCreate
 
-
 def get_all_checklists(db: Session):
     return db.query(models.Checklist).all()
 

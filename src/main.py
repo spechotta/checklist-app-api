@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.checklists import models
 from src.checklists.controller import router as checklist_router
+from src.checklists.exceptions import register_exception_handlers
 from src.database import engine
 
 app = FastAPI()
@@ -20,5 +21,8 @@ app.add_middleware(
     allow_headers = ["*"],
 )
 
-# Register checklist routes with the main FastAPI application
+# Register checklist routes with the FastAPI app
 app.include_router(checklist_router)
+
+# Register exception handlers with the FastAPI app
+register_exception_handlers(app)
