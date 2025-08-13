@@ -1,0 +1,628 @@
+{
+	"info": {
+		"_postman_id": "ab35a3ca-de5e-43db-a3d1-6a713fc5d1e4",
+		"name": "ListHub API Services",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "38654635"
+	},
+	"item": [
+		{
+			"name": "Create Empty Checklist",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonResponse = JSON.parse(pm.response.text());\r",
+							"\r",
+							"const emptyChecklistId = jsonResponse.id;\r",
+							"pm.environment.set(\"emptyChecklistId\", emptyChecklistId); \r",
+							"\r",
+							"pm.test(\"Create Empty Checklist\", function () {\r",
+							"        pm.response.to.have.status(201);\r",
+							"    });"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"title\": \"My Empty Checklist\",\r\n  \"items\": []\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/checklists/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"checklists",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Checklist with Some Items",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonResponse = JSON.parse(pm.response.text());\r",
+							"\r",
+							"const checklistWithItemsId = jsonResponse.id;\r",
+							"pm.environment.set(\"checklistWithItemsId\", checklistWithItemsId); \r",
+							"\r",
+							"const firstItem = jsonResponse.items[0];\r",
+							"pm.environment.set(\"firstItemId\", firstItem.id);\r",
+							"\r",
+							"pm.test(\"Create Checklist with Some Items\", function () {\r",
+							"        pm.response.to.have.status(201);\r",
+							"    });"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"title\": \"New Checklist with Some Items\",\r\n  \"items\": [\r\n    {\r\n        \"text\": \"task 1\",\r\n        \"isComplete\": false        \r\n    },\r\n    {\r\n        \"text\": \"task 2\",\r\n        \"isComplete\": false\r\n    },\r\n    {\r\n        \"text\": \"task 3\",\r\n        \"isComplete\": false\r\n    }\r\n  ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/checklists/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"checklists",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Checklists",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Get All Checklists\", function () {\r",
+							"        pm.response.to.have.status(200);\r",
+							"    });"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/checklists",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"checklists"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get a Checklist (Checklist Exists)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Get a Checklist (Checklist Exists)\", function () {\r",
+							"        pm.response.to.have.status(200);\r",
+							"    });"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/checklists/{{checklistWithItemsId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"checklists",
+						"{{checklistWithItemsId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get a Checklist (Checklist DNE)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Get a Checklist (Checklist DNE)\", function () {\r",
+							"        pm.response.to.have.status(404);\r",
+							"    });"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/checklists/5",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"checklists",
+						"5"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Checklist Items (Checklist Exists)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Get Checklist Items (Checklist Exists)\", function () {\r",
+							"        pm.response.to.have.status(200);\r",
+							"    });"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/checklists/{{checklistWithItemsId}}/items",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"checklists",
+						"{{checklistWithItemsId}}",
+						"items"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Checklist Items (Checklist DNE)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Get Checklist Items (Checklist DNE)\", function () {\r",
+							"        pm.response.to.have.status(404);\r",
+							"    });"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/checklists/5/items",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"checklists",
+						"5",
+						"items"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get a Checklist Item (Checklist and Item Exist)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Get a Checklist Item (Item Exists in Checklist)\", function () {\r",
+							"        pm.response.to.have.status(200);\r",
+							"    });"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/checklists/{{checklistWithItemsId}}/items/{{firstItemId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"checklists",
+						"{{checklistWithItemsId}}",
+						"items",
+						"{{firstItemId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get a Checklist Item (Item DNE in Checklist)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Get a Checklist Item (Item DNE in Checklist)\", function () {\r",
+							"        pm.response.to.have.status(404);\r",
+							"    });"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/checklists/{{checklistWithItemsId}}/items/23",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"checklists",
+						"{{checklistWithItemsId}}",
+						"items",
+						"23"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Checklist Item (Item Exists in Checklist)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Update Checklist Item (Item Exists in Checklist)\", function () {\r",
+							"        pm.response.to.have.status(200);\r",
+							"    });"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"text\": \"text successfully updated\",\r\n  \"isComplete\": true\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/checklists/{{checklistWithItemsId}}/items/{{firstItemId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"checklists",
+						"{{checklistWithItemsId}}",
+						"items",
+						"{{firstItemId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Checklist Item (Item DNE in Checklist)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Update Checklist Item (Item DNE in Checklist)\", function () {\r",
+							"        pm.response.to.have.status(404);\r",
+							"    });"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"text\": \"text successfully updated\",\r\n  \"isComplete\": true\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/checklists/{{checklistWithItemsId}}/items/23",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"checklists",
+						"{{checklistWithItemsId}}",
+						"items",
+						"23"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Empty Checklist (Checklist Exists)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Delete Empty Checklist (Checklist Exists)\", function () {\r",
+							"        pm.response.to.have.status(204);\r",
+							"    });"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/checklists/{{emptyChecklistId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"checklists",
+						"{{emptyChecklistId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Empty Checklist (Checklist DNE)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Delete Empty Checklist (Checklist DNE)\", function () {\r",
+							"        pm.response.to.have.status(404);\r",
+							"    });"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/checklists/5",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"checklists",
+						"5"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Item from Checklist (Item Exists in Checklist)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Delete Item from Checklist (Item Exists in Checklist)\", function () {\r",
+							"        pm.response.to.have.status(204);\r",
+							"    });"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/checklists/{{checklistWithItemsId}}/items/{{firstItemId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"checklists",
+						"{{checklistWithItemsId}}",
+						"items",
+						"{{firstItemId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Item from Checklist (Item DNE in Checklist)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Delete Item from Checklist (Item DNE in Checklist))\", function () {\r",
+							"        pm.response.to.have.status(404);\r",
+							"    });"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/checklists/{{checklistWithItemsId}}/items/23",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"checklists",
+						"{{checklistWithItemsId}}",
+						"items",
+						"23"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Checklist with Items (Checklist Exists)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Delete Checklist with Items (Checklist Exists)\", function () {\r",
+							"        pm.response.to.have.status(204);\r",
+							"    });"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/checklists/{{checklistWithItemsId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"checklists",
+						"{{checklistWithItemsId}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
