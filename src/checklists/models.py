@@ -16,6 +16,6 @@ class Checklist(Base):
     __tablename__ = "checklists"
 
     id = Column(Integer, primary_key = True, index = True)
-    title = Column(String(50))
+    title = Column(String(50), nullable = False)
 
     items = relationship("Item", back_populates = "checklist", cascade = "all, delete-orphan")
