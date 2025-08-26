@@ -361,15 +361,33 @@
 			"response": []
 		},
 		{
-			"name": "Update Checklist Title (Checklist Exists)",
+			"name": "Add Items to Checklist (Checklist Exists)",
 			"event": [
 				{
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Update Checklist Title (Checklist Exists)\", function () {\r",
+							"let checklist = pm.response.json();\r",
+							"\r",
+							"if (checklist.items && checklist.items.length > 0) {\r",
+							"    checklist.items.forEach((item, index) => {\r",
+							"        pm.environment.set(`itemId${index + 1}`, item.id);\r",
+							"    });\r",
+							"}\r",
+							"\r",
+							"pm.test(\"First item has correct initial values\", function () {\r",
+							"    pm.expect(checklist.items[0].text).to.eql(\"New Item 1\");\r",
+							"    pm.expect(checklist.items[0].isComplete).to.eql(false);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Second item has correct initial values\", function () {\r",
+							"    pm.expect(checklist.items[1].text).to.eql(\"New Item 2\");\r",
+							"    pm.expect(checklist.items[1].isComplete).to.eql(false);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Add Items to Checklist (Checklist Exists)\", function () {\r",
 							"        pm.response.to.have.status(200);\r",
-							"    });"
+							"});"
 						],
 						"type": "text/javascript",
 						"packages": {}
@@ -377,11 +395,183 @@
 				}
 			],
 			"request": {
-				"method": "PATCH",
+				"method": "PUT",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n  \"title\": \"title successfully updated\"  \r\n}",
+					"raw": "{\r\n  \"title\": \"My Empty Checklist\",\r\n  \"id\": {{emptyChecklistId}},\r\n  \"items\": [\r\n    {\r\n        \"text\": \"New Item 1\",\r\n        \"isComplete\": false        \r\n    },\r\n    {\r\n        \"text\": \"New Item 2\",\r\n        \"isComplete\": false \r\n    }\r\n  ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/checklists/{{emptyChecklistId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"checklists",
+						"{{emptyChecklistId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Items in Checklist (Checklist Exists)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let checklist = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Item 1 text and isComplete are correct\", function () {\r",
+							"    pm.expect(checklist.items[0].id).to.eql(parseInt(pm.environment.get(\"itemId1\")));\r",
+							"    pm.expect(checklist.items[0].text).to.eql(\"updated item 1\");\r",
+							"    pm.expect(checklist.items[0].isComplete).to.eql(false);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Item 2 text and isComplete are correct\", function () {\r",
+							"    pm.expect(checklist.items[1].id).to.eql(parseInt(pm.environment.get(\"itemId2\")));\r",
+							"    pm.expect(checklist.items[1].text).to.eql(\"updated item 2\");\r",
+							"    pm.expect(checklist.items[1].isComplete).to.eql(true);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Update Items in Checklist (Checklist Exists)\", function () {\r",
+							"        pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"title\": \"My Empty Checklist\",\r\n  \"id\": {{emptyChecklistId}},\r\n  \"items\": [\r\n    {\r\n        \"id\": {{itemId1}},\r\n        \"text\": \"updated item 1\",\r\n        \"isComplete\": false        \r\n    },\r\n    {\r\n        \"id\": {{itemId2}},\r\n        \"text\": \"updated item 2\",\r\n        \"isComplete\": true \r\n    }\r\n  ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/checklists/{{emptyChecklistId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"checklists",
+						"{{emptyChecklistId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Remove Item from Checklist (Checklist Exists)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let checklist = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Checklist contains 1 item\", function () {\r",
+							"    pm.expect(checklist.items.length).to.eql(1);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Remaining item is Item 2\", function () {\r",
+							"    pm.expect(checklist.items[0].id).to.eql(parseInt(pm.environment.get(\"itemId2\")));\r",
+							"    pm.expect(checklist.items[0].text).to.eql(\"updated item 2\");\r",
+							"    pm.expect(checklist.items[0].isComplete).to.eql(true);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Item 1 has been removed\", function () {\r",
+							"    let item1 = checklist.items.find(item => item.id === parseInt(pm.environment.get(\"itemId1\")));\r",
+							"    pm.expect(item1).to.eql(undefined);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Remove Item from Checklist (Checklist Exists)\", function () {\r",
+							"        pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"title\": \"My Empty Checklist\",\r\n  \"id\": {{emptyChecklistId}},\r\n  \"items\": [    \r\n    {\r\n        \"id\": {{itemId2}},\r\n        \"text\": \"updated item 2\",\r\n        \"isComplete\": true \r\n    }\r\n  ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/checklists/{{emptyChecklistId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"checklists",
+						"{{emptyChecklistId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Checklist Title (Checklist Exists)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let checklist = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Checklist title has been updated\", function () {\r",
+							"    pm.expect(checklist.title).to.eql(\"Updated Checklist Title\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Existing item is unchanged\", function () {\r",
+							"    pm.expect(checklist.items[0].id).to.eql(parseInt(pm.environment.get(\"itemId2\")));\r",
+							"    pm.expect(checklist.items[0].text).to.eql(\"updated item 2\");\r",
+							"    pm.expect(checklist.items[0].isComplete).to.eql(true);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Update Checklist Title (Checklist Exists)\", function () {\r",
+							"        pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"title\": \"Updated Checklist Title\",\r\n  \"id\": {{emptyChecklistId}},\r\n  \"items\": [    \r\n    {\r\n        \"id\": {{itemId2}},\r\n        \"text\": \"updated item 2\",\r\n        \"isComplete\": true \r\n    }\r\n  ]\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -420,11 +610,11 @@
 				}
 			],
 			"request": {
-				"method": "PATCH",
+				"method": "PUT",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n  \"title\": \"title successfully updated\"  \r\n}",
+					"raw": "{\r\n  \"title\": \"Updated Checklist Title\",\r\n  \"id\": 5,\r\n  \"items\": [    \r\n    {\r\n        \"id\": {{itemId2}},\r\n        \"text\": \"updated item 2\",\r\n        \"isComplete\": true \r\n    }\r\n  ]\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
