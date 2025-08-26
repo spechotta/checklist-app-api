@@ -6,9 +6,6 @@ from src.checklists.schemas import ChecklistCreate, ItemCreate
 def get_all_checklists(db: Session):
     return db.query(models.Checklist).all()
 
-def get_checklist_by_id(checklist_id: int, db: Session):
-    return db.query(models.Checklist).filter(models.Checklist.id == checklist_id).first()
-
 def create_checklist(checklist: ChecklistCreate, db: Session):
     db_checklist = models.Checklist(title = checklist.title)
     db.add(db_checklist)
@@ -27,6 +24,18 @@ def create_checklist(checklist: ChecklistCreate, db: Session):
     db.refresh(db_checklist)
     return db_checklist
 
+def get_checklist_by_id(checklist_id: int, db: Session):
+    return db.query(models.Checklist).filter(models.Checklist.id == checklist_id).first()
+
+def save_checklist(db_checklist: Checklist, db: Session):
+    db.commit()
+    db.refresh(db_checklist)
+    return db_checklist
+
+def delete_checklist(db_checklist: Checklist, db: Session):
+    db.delete(db_checklist)
+    db.commit()
+
 def add_item_to_checklist(db_checklist: Checklist, item: ItemCreate, db: Session):
     db_item = models.Item(
         text = item.text,
@@ -38,10 +47,6 @@ def add_item_to_checklist(db_checklist: Checklist, item: ItemCreate, db: Session
     db.commit()
     db.refresh(db_item)
     return db_item
-
-def delete_checklist(db_checklist: Checklist, db: Session):
-    db.delete(db_checklist)
-    db.commit()
 
 def get_item_by_id(checklist_id: int, item_id: int, db: Session):
     return (db.query(models.Item)

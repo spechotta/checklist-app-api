@@ -2,6 +2,7 @@ from sqlalchemy import Column, String, Boolean, Integer, ForeignKey
 from sqlalchemy.orm import relationship
 from src.database import Base
 
+
 class Item(Base):
     __tablename__ = "items"
 
@@ -11,6 +12,7 @@ class Item(Base):
     checklistId = Column(Integer, ForeignKey("checklists.id"), nullable = False)
 
     checklist = relationship("Checklist", back_populates = "items")
+
 
 class Checklist(Base):
     __tablename__ = "checklists"

@@ -1,10 +1,15 @@
 from sqlalchemy.orm import Session
 from src.checklists import repository
 from src.checklists.exceptions import ChecklistNotFoundException, ItemNotFoundException
-from src.checklists.schemas import ChecklistCreate, ItemCreate, ItemBase
+from src.checklists.schemas import ChecklistCreate, ItemCreate, ItemBase, ChecklistUpdate
+
 
 def get_checklists(db: Session):
     return repository.get_all_checklists(db)
+
+def create_checklist(checklist_create: ChecklistCreate, db: Session):
+    db_checklist = checklist_create.dto_to_orm()
+    return repository.create_checklist(db_checklist, db)
 
 def get_checklist(checklist_id: int, db: Session):
     db_checklist = repository.get_checklist_by_id(checklist_id, db)
@@ -12,20 +17,26 @@ def get_checklist(checklist_id: int, db: Session):
         raise ChecklistNotFoundException(checklist_id)
     return db_checklist
 
-def create_checklist(checklist: ChecklistCreate, db: Session):
-    return repository.create_checklist(checklist, db)
-
-def add_item_to_checklist(checklist_id: int, item: ItemCreate, db: Session):
-    db_checklist = repository.get_checklist_by_id(checklist_id, db)
-    if not db_checklist:
+def update_checklist(checklist_id: int, checklist_update: ChecklistUpdate, db: Session):
+    existing_checklist = repository.get_checklist_by_id(checklist_id, db)
+    if not existing_checklist:
         raise ChecklistNotFoundException(checklist_id)
-    return repository.add_item_to_checklist(db_checklist, item, db)
+
+    db_checklist = checklist_update.dto_to_orm(checklist_id)
+    merged_checklist = db.merge(db_checklist)
+    return repository.save_checklist(merged_checklist, db)
 
 def delete_checklist(checklist_id: int, db: Session):
     db_checklist = repository.get_checklist_by_id(checklist_id, db)
     if not db_checklist:
         raise ChecklistNotFoundException(checklist_id)
     repository.delete_checklist(db_checklist, db)
+
+def add_item_to_checklist(checklist_id: int, item: ItemCreate, db: Session):
+    db_checklist = repository.get_checklist_by_id(checklist_id, db)
+    if not db_checklist:
+        raise ChecklistNotFoundException(checklist_id)
+    return repository.add_item_to_checklist(db_checklist, item, db)
 
 def get_items(checklist_id: int, db: Session):
     db_checklist = repository.get_checklist_by_id(checklist_id, db)

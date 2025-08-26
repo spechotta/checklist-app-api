@@ -361,6 +361,92 @@
 			"response": []
 		},
 		{
+			"name": "Update Checklist Title (Checklist Exists)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Update Checklist Title (Checklist Exists)\", function () {\r",
+							"        pm.response.to.have.status(200);\r",
+							"    });"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"title\": \"title successfully updated\"  \r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/checklists/{{emptyChecklistId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"checklists",
+						"{{emptyChecklistId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Checklist Title (Checklist DNE)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Update Checklist Title (Checklist DNE)\", function () {\r",
+							"        pm.response.to.have.status(404);\r",
+							"    });"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"title\": \"title successfully updated\"  \r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/checklists/5",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"checklists",
+						"5"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Update Checklist Item (Item Exists in Checklist)",
 			"event": [
 				{

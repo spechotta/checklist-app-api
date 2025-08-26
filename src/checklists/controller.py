@@ -1,7 +1,7 @@
 from typing import List
 from fastapi import APIRouter, status, Response
 from src.checklists import service
-from src.checklists.schemas import ChecklistResponse, ChecklistCreate, ItemCreate, ItemResponse, ItemBase
+from src.checklists.schemas import ChecklistResponse, ChecklistCreate, ItemCreate, ItemResponse, ItemBase, ChecklistUpdate
 from src.dependencies import DbSession
 
 router = APIRouter(prefix = "/checklists", tags = ["Checklists"])
@@ -10,22 +10,26 @@ router = APIRouter(prefix = "/checklists", tags = ["Checklists"])
 def get_checklists(db: DbSession):
     return service.get_checklists(db)
 
-@router.get("/{checklist_id}", status_code = status.HTTP_200_OK, response_model = ChecklistResponse)
-def get_checklist(checklist_id: int, db: DbSession):
-    return service.get_checklist(checklist_id, db)
-
 @router.post("", status_code = status.HTTP_201_CREATED, response_model = ChecklistResponse)
 def create_checklist(checklist: ChecklistCreate, db: DbSession):
     return service.create_checklist(checklist, db)
 
-@router.post("/{checklist_id}/items", status_code = status.HTTP_201_CREATED, response_model = ItemResponse)
-def add_item_to_checklist(checklist_id: int, item: ItemCreate, db: DbSession):
-    return service.add_item_to_checklist(checklist_id, item, db)
+@router.get("/{checklist_id}", status_code = status.HTTP_200_OK, response_model = ChecklistResponse)
+def get_checklist(checklist_id: int, db: DbSession):
+    return service.get_checklist(checklist_id, db)
+
+@router.put("/{checklist_id}", status_code = status.HTTP_200_OK, response_model = ChecklistResponse)
+def update_checklist(checklist_id: int, checklist: ChecklistUpdate, db: DbSession):
+    return service.update_checklist(checklist_id, checklist, db)
 
 @router.delete("/{checklist_id}", status_code = status.HTTP_204_NO_CONTENT)
 def delete_checklist(checklist_id: int, db: DbSession):
     service.delete_checklist(checklist_id, db)
     return Response(status_code = status.HTTP_204_NO_CONTENT)
+
+@router.post("/{checklist_id}/items", status_code = status.HTTP_201_CREATED, response_model = ItemResponse)
+def add_item_to_checklist(checklist_id: int, item: ItemCreate, db: DbSession):
+    return service.add_item_to_checklist(checklist_id, item, db)
 
 @router.get("/{checklist_id}/items", status_code = status.HTTP_200_OK, response_model = List[ItemResponse])
 def get_items(checklist_id: int, db: DbSession):
