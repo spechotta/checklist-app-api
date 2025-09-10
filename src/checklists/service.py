@@ -18,13 +18,12 @@ def get_checklist(checklist_id: int, db: Session):
     return db_checklist
 
 def update_checklist(checklist_id: int, checklist_update: ChecklistUpdate, db: Session):
-    existing_checklist = repository.get_checklist_by_id(checklist_id, db)
-    if not existing_checklist:
+    db_checklist = repository.get_checklist_by_id(checklist_id, db)
+    if not db_checklist:
         raise ChecklistNotFoundException(checklist_id)
 
-    db_checklist = checklist_update.dto_to_orm(checklist_id)
-    merged_checklist = db.merge(db_checklist)
-    return repository.save_checklist(merged_checklist, db)
+    checklist_update.dto_to_orm(db_checklist)
+    return repository.save_checklist(db_checklist, db)
 
 def delete_checklist(checklist_id: int, db: Session):
     db_checklist = repository.get_checklist_by_id(checklist_id, db)

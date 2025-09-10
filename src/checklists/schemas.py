@@ -47,11 +47,31 @@ class ChecklistUpdate(ChecklistBase):
     id: int
     items: List[ItemUpdate] = []
 
-    def dto_to_orm(self, checklist_id: int) -> models.Checklist:
-        checklist = models.Checklist(id = checklist_id)
+    def dto_to_orm(self, checklist: models.Checklist) -> models.Checklist:
         checklist.title = self.title
+
+        existing_items = {}
+        for item in checklist.items:
+            existing_items[item.id] = item
+
+        updated_items = []
         for item in self.items:
-            checklist.items.append(item.dto_to_orm())
+            if item.id is None:
+                new_item = models.Item(
+                    text = item.text,
+                    isComplete = item.isComplete,
+                    checklistId = checklist.id
+                )
+                updated_items.append(new_item)
+            else:
+                if item.id in existing_items:
+                    updated_item = existing_items[item.id]
+                    updated_item.text = item.text
+                    updated_item.isComplete = item.isComplete
+                    updated_items.append(updated_item)
+
+        checklist.items = updated_items
+
         return checklist
 
 class ChecklistResponse(ChecklistBase):
