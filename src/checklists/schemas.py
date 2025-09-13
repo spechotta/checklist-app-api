@@ -17,11 +17,12 @@ class ItemCreate(ItemBase):
 class ItemUpdate(ItemBase):
     id: Optional[int] = None
 
-    def dto_to_orm(self) -> models.Item:
+    def dto_to_orm(self, checklist_id: int) -> models.Item:
         return models.Item(
             id = self.id,
             text = self.text,
-            isComplete = self.isComplete
+            isComplete = self.isComplete,
+            checklistId = checklist_id
         )
 
 class ItemResponse(ItemBase):
@@ -57,12 +58,7 @@ class ChecklistUpdate(ChecklistBase):
         updated_items = []
         for item in self.items:
             if item.id is None:
-                new_item = models.Item(
-                    text = item.text,
-                    isComplete = item.isComplete,
-                    checklistId = checklist.id
-                )
-                updated_items.append(new_item)
+                updated_items.append(item.dto_to_orm(checklist.id))
             else:
                 if item.id in existing_items:
                     updated_item = existing_items[item.id]
