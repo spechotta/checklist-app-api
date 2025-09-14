@@ -3,52 +3,44 @@ from pydantic import BaseModel
 from src.checklists import models
 
 
-class ItemBase(BaseModel):
+class Item(BaseModel):
+    id: Optional[int] = None
     text: str
     isComplete: bool
+    checklistId: Optional[int] = None
 
-class ItemCreate(ItemBase):
-    def dto_to_orm(self) -> models.Item:
-        return models.Item(
-            text = self.text,
-            isComplete = self.isComplete
-        )
-
-class ItemUpdate(ItemBase):
-    id: Optional[int] = None
-
-    def dto_to_orm(self, checklist_id: int) -> models.Item:
+    def dto_to_orm(self, checklist_id: Optional[int] = None) -> models.Item:
         return models.Item(
             id = self.id,
             text = self.text,
             isComplete = self.isComplete,
-            checklistId = checklist_id
+            checklistId = self.checklistId or checklist_id
         )
 
-class ItemResponse(ItemBase):
+class ItemResponse(Item):
     id: int
     checklistId: int
 
     class Config:
         from_attributes = True
 
-class ChecklistBase(BaseModel):
+class Checklist(BaseModel):
+    id: Optional[int] = None
     title: str
+    items: List[Item] = []
 
-class ChecklistCreate(ChecklistBase):
-    items: List[ItemCreate] = []
+    def dto_to_orm(self, checklist: Optional[models.Checklist] = None):
+        if checklist is None:
+            return self._create_checklist()
+        return self._update_checklist(checklist)
 
-    def dto_to_orm(self) -> models.Checklist:
+    def _create_checklist(self) -> models.Checklist:
         checklist = models.Checklist(title = self.title)
         for item in self.items:
             checklist.items.append(item.dto_to_orm())
         return checklist
 
-class ChecklistUpdate(ChecklistBase):
-    id: int
-    items: List[ItemUpdate] = []
-
-    def dto_to_orm(self, checklist: models.Checklist) -> models.Checklist:
+    def _update_checklist(self, checklist: models.Checklist) -> models.Checklist:
         checklist.title = self.title
 
         existing_items = {}
@@ -59,18 +51,17 @@ class ChecklistUpdate(ChecklistBase):
         for item in self.items:
             if item.id is None:
                 updated_items.append(item.dto_to_orm(checklist.id))
-            else:
-                if item.id in existing_items:
-                    updated_item = existing_items[item.id]
-                    updated_item.text = item.text
-                    updated_item.isComplete = item.isComplete
-                    updated_items.append(updated_item)
+            elif item.id in existing_items:
+                updated_item = existing_items[item.id]
+                updated_item.text = item.text
+                updated_item.isComplete = item.isComplete
+                updated_items.append(updated_item)
 
         checklist.items = updated_items
 
         return checklist
 
-class ChecklistResponse(ChecklistBase):
+class ChecklistResponse(Checklist):
     id: int
     items: List[ItemResponse] = []
 

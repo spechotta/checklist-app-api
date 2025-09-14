@@ -1,13 +1,13 @@
 from sqlalchemy.orm import Session
 from src.checklists import repository
 from src.checklists.exceptions import ChecklistNotFoundException, ItemNotFoundException
-from src.checklists.schemas import ChecklistCreate, ItemCreate, ItemBase, ChecklistUpdate
+from src.checklists.schemas import Item, Checklist
 
 
 def get_checklists(db: Session):
     return repository.get_all_checklists(db)
 
-def create_checklist(checklist_create: ChecklistCreate, db: Session):
+def create_checklist(checklist_create: Checklist, db: Session):
     db_checklist = checklist_create.dto_to_orm()
     return repository.create_checklist(db_checklist, db)
 
@@ -17,7 +17,7 @@ def get_checklist(checklist_id: int, db: Session):
         raise ChecklistNotFoundException(checklist_id)
     return db_checklist
 
-def update_checklist(checklist_id: int, checklist_update: ChecklistUpdate, db: Session):
+def update_checklist(checklist_id: int, checklist_update: Checklist, db: Session):
     db_checklist = repository.get_checklist_by_id(checklist_id, db)
     if not db_checklist:
         raise ChecklistNotFoundException(checklist_id)
@@ -31,7 +31,7 @@ def delete_checklist(checklist_id: int, db: Session):
         raise ChecklistNotFoundException(checklist_id)
     repository.delete_checklist(db_checklist, db)
 
-def add_item_to_checklist(checklist_id: int, item: ItemCreate, db: Session):
+def add_item_to_checklist(checklist_id: int, item: Item, db: Session):
     db_checklist = repository.get_checklist_by_id(checklist_id, db)
     if not db_checklist:
         raise ChecklistNotFoundException(checklist_id)
@@ -49,7 +49,7 @@ def get_item(checklist_id: int, item_id: int, db: Session):
         raise ItemNotFoundException(checklist_id, item_id)
     return db_item
 
-def update_item(checklist_id: int, item_id: int, item: ItemBase, db: Session):
+def update_item(checklist_id: int, item_id: int, item: Item, db: Session):
     db_item = repository.get_item_by_id(checklist_id, item_id, db)
     if not db_item:
         raise ItemNotFoundException(checklist_id, item_id)

@@ -1,12 +1,12 @@
 from sqlalchemy.orm import Session
 from src.checklists import models
-from src.checklists.models import Item, Checklist
-from src.checklists.schemas import ChecklistCreate, ItemCreate
+from src.checklists.schemas import Checklist, Item
+
 
 def get_all_checklists(db: Session):
     return db.query(models.Checklist).all()
 
-def create_checklist(checklist: ChecklistCreate, db: Session):
+def create_checklist(checklist: Checklist, db: Session):
     db_checklist = models.Checklist(title = checklist.title)
     db.add(db_checklist)
     db.commit()
@@ -36,7 +36,7 @@ def delete_checklist(db_checklist: Checklist, db: Session):
     db.delete(db_checklist)
     db.commit()
 
-def add_item_to_checklist(db_checklist: Checklist, item: ItemCreate, db: Session):
+def add_item_to_checklist(db_checklist: Checklist, item: Item, db: Session):
     db_item = models.Item(
         text = item.text,
         isComplete = item.isComplete,
