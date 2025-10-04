@@ -22,6 +22,6 @@ async def item_not_found_exception_handler(request: Request, exc: ItemNotFoundEx
         content={"detail": "Item not found"}
     )
 
-def register_exception_handlers(app: FastAPI):
+def register_checklist_exception_handlers(app: FastAPI):
     app.add_exception_handler(ChecklistNotFoundException, checklist_not_found_exception_handler)
     app.add_exception_handler(ItemNotFoundException, item_not_found_exception_handler)

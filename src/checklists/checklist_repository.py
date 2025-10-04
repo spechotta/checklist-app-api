@@ -1,19 +1,19 @@
 from sqlalchemy.orm import Session
-from src.checklists import models
-from src.checklists.schemas import Checklist, Item
+from src.checklists import checklist_models
+from src.checklists.checklist_schemas import Checklist, Item
 
 
 def get_all_checklists(db: Session):
-    return db.query(models.Checklist).all()
+    return db.query(checklist_models.Checklist).all()
 
 def create_checklist(checklist: Checklist, db: Session):
-    db_checklist = models.Checklist(title = checklist.title)
+    db_checklist = checklist_models.Checklist(title = checklist.title)
     db.add(db_checklist)
     db.commit()
     db.refresh(db_checklist)
 
     for item in checklist.items:
-        db_item = models.Item(
+        db_item = checklist_models.Item(
             text = item.text,
             isComplete = item.isComplete,
             checklistId = db_checklist.id
@@ -25,7 +25,7 @@ def create_checklist(checklist: Checklist, db: Session):
     return db_checklist
 
 def get_checklist_by_id(checklist_id: int, db: Session):
-    return db.query(models.Checklist).filter(models.Checklist.id == checklist_id).first()
+    return db.query(checklist_models.Checklist).filter(checklist_models.Checklist.id == checklist_id).first()
 
 def save_checklist(db_checklist: Checklist, db: Session):
     db.commit()
@@ -37,7 +37,7 @@ def delete_checklist(db_checklist: Checklist, db: Session):
     db.commit()
 
 def add_item_to_checklist(db_checklist: Checklist, item: Item, db: Session):
-    db_item = models.Item(
+    db_item = checklist_models.Item(
         text = item.text,
         isComplete = item.isComplete,
         checklistId = db_checklist.id
@@ -49,8 +49,8 @@ def add_item_to_checklist(db_checklist: Checklist, item: Item, db: Session):
     return db_item
 
 def get_item_by_id(checklist_id: int, item_id: int, db: Session):
-    return (db.query(models.Item)
-            .filter(models.Item.checklistId == checklist_id, models.Item.id == item_id)
+    return (db.query(checklist_models.Item)
+            .filter(checklist_models.Item.checklistId == checklist_id, checklist_models.Item.id == item_id)
             .first())
 
 def save_item(db_item: Item, db: Session):
