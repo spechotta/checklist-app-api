@@ -6,17 +6,11 @@ from src.users.user_schemas import User
 def get_all_users(db: Session):
     return db.query(user_models.User).all()
 
-def create_user(user: User, db: Session):
-    db_user = user_models.User(
-        firstName = user.firstName,
-        lastName = user.lastName,
-        email = user.email,
-        hashedPassword = user.hashedPassword
-    )
-    db.add(db_user)
+def create_user(user: user_models.User, db: Session):
+    db.add(user)
     db.commit()
-    db.refresh(db_user)
-    return db_user
+    db.refresh(user)
+    return user
 
 def get_user_by_id(user_id: int, db: Session):
     return db.query(user_models.User).filter(user_models.User.id == user_id).first()

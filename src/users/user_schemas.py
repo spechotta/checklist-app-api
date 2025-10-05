@@ -64,3 +64,12 @@ class UserResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+    @classmethod
+    def orm_to_dto(cls, user: user_models.User):
+        user_dto = cls.model_validate(user, from_attributes = True)
+
+        for assoc in user.users_checklists:
+            user_dto.checklist_ids.append(assoc.checklist_id)
+
+        return user_dto

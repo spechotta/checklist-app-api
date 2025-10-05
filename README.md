@@ -51,7 +51,7 @@ Before running the application, please make sure these are installed:
 3. **Install required dependencies manually:**
 
    ```bash
-   pip install fastapi pymysql sqlalchemy uvicorn python-dotenv
+   pip install fastapi pymysql sqlalchemy uvicorn python-dotenv pydantic[email]
 
 4. **Create a `.env` file in the project root directory with the following content:**
 

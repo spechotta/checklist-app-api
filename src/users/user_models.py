@@ -12,7 +12,7 @@ class User(Base):
     email = Column(String(100), unique = True, nullable = False, index = True)
     hashedPassword = Column(String(200), nullable = False)
 
-    users_checklists = relationship("UsersChecklists", back_populates = "user")
+    users_checklists = relationship("UsersChecklists", back_populates = "user", cascade = "all, delete-orphan")
 
 
 class UsersChecklists(Base):

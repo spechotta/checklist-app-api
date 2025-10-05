@@ -21,4 +21,4 @@ class Checklist(Base):
     title = Column(String(50), nullable = False)
 
     items = relationship("Item", back_populates = "checklist", cascade = "all, delete-orphan")
-    users_checklists = relationship("UsersChecklists", back_populates = "checklist")
+    users_checklists = relationship("UsersChecklists", back_populates = "checklist", cascade = "all, delete-orphan")
