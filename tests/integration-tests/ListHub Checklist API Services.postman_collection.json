@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "ab35a3ca-de5e-43db-a3d1-6a713fc5d1e4",
-		"name": "ListHub API Services",
+		"name": "ListHub Checklist API Services",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "38654635"
 	},
@@ -219,41 +219,6 @@
 			"response": []
 		},
 		{
-			"name": "Get Checklist Items (Checklist Exists)",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Get Checklist Items (Checklist Exists)\", function () {\r",
-							"        pm.response.to.have.status(200);\r",
-							"    });"
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:8000/checklists/{{checklistWithItemsId}}/items",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8000",
-					"path": [
-						"checklists",
-						"{{checklistWithItemsId}}",
-						"items"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "Get Checklist Items (Checklist DNE)",
 			"event": [
 				{
@@ -282,6 +247,41 @@
 					"path": [
 						"checklists",
 						"5",
+						"items"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Checklist Items (Checklist Exists)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Get Checklist Items (Checklist Exists)\", function () {\r",
+							"        pm.response.to.have.status(200);\r",
+							"    });"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/checklists/{{checklistWithItemsId}}/items",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"checklists",
+						"{{checklistWithItemsId}}",
 						"items"
 					]
 				}

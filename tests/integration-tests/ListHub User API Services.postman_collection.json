@@ -1,0 +1,440 @@
+{
+	"info": {
+		"_postman_id": "39694391-d5a6-48c4-bcf6-379e67f3d9fd",
+		"name": "ListHub User API Services",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "38654635"
+	},
+	"item": [
+		{
+			"name": "Create Empty Checklist",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseData = pm.response.json();\r",
+							"\r",
+							"const emptyChecklistId = responseData.id;\r",
+							"pm.environment.set(\"emptyChecklistId\", emptyChecklistId); \r",
+							"\r",
+							"pm.test(\"Status Code Is 201\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"title\": \"My Empty Checklist\",\r\n  \"items\": []\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/checklists/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"checklists",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Checklist with Some Items",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseData = pm.response.json();\r",
+							"\r",
+							"const checklistWithItemsId = responseData.id;\r",
+							"pm.environment.set(\"checklistWithItemsId\", checklistWithItemsId);\r",
+							"\r",
+							"pm.test(\"Status Code Is 201\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"title\": \"New Checklist with Some Items\",\r\n  \"items\": [\r\n    {\r\n        \"text\": \"task 1\",\r\n        \"isComplete\": false        \r\n    },\r\n    {\r\n        \"text\": \"task 2\",\r\n        \"isComplete\": false\r\n    },\r\n    {\r\n        \"text\": \"task 3\",\r\n        \"isComplete\": false\r\n    }\r\n  ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/checklists/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"checklists",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create User with No Associated Checklists",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseData = pm.response.json();\r",
+							"\r",
+							"const pGibbonsUserId = responseData.id;\r",
+							"pm.environment.set(\"pGibbonsUserId\", pGibbonsUserId); \r",
+							"\r",
+							"pm.test(\"Status Code Is 201\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"'checklist_ids' List Is Empty\", function () {\r",
+							"    pm.expect(responseData.checklist_ids).to.be.an(\"array\").that.is.empty;\r",
+							"});\r",
+							"\r",
+							"pm.test(\"'firstName' Field Has Expected Value\", function () {\r",
+							"    pm.expect(responseData.firstName).to.equal(\"Peter\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"'lastName' Field Has Expected Value\", function () {\r",
+							"    pm.expect(responseData.lastName).to.equal(\"Gibbons\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"'email' Field Has Expected Value\", function () {\r",
+							"    pm.expect(responseData.email).to.equal(\"pgibbons@example.com\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"'hashedPassword' Is Not Returned\", function () {\r",
+							"    pm.expect(responseData).to.not.have.property(\"hashedPassword\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"firstName\": \"Peter\",\r\n  \"lastName\": \"Gibbons\",\r\n  \"email\": \"pgibbons@example.com\",\r\n  \"hashedPassword\": \"PGibbonsPwd123\",\r\n  \"checklist_ids\": []\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/users/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"users",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create User with Associated Checklists",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseData = pm.response.json();\r",
+							"\r",
+							"const bLumberghUserId = responseData.id;\r",
+							"pm.environment.set(\"bLumberghUserId\", bLumberghUserId); \r",
+							"\r",
+							"const emptyChecklistId = parseInt(pm.environment.get(\"emptyChecklistId\"));\r",
+							"const checklistWithItemsId = parseInt(pm.environment.get(\"checklistWithItemsId\"));\r",
+							"\r",
+							"pm.test(\"Status Code Is 201\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"'checklist_ids' List Contains Expected Checklists\", function () {\r",
+							"    pm.expect(responseData.checklist_ids).to.include(emptyChecklistId);\r",
+							"    pm.expect(responseData.checklist_ids).to.include(checklistWithItemsId);\r",
+							"    pm.expect(responseData.checklist_ids.length).to.equal(2);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"'firstName' Field Has Expected Value\", function () {\r",
+							"    pm.expect(responseData.firstName).to.equal(\"Bill\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"'lastName' Field Has Expected Value\", function () {\r",
+							"    pm.expect(responseData.lastName).to.equal(\"Lumbergh\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"'email' Field Has Expected Value\", function () {\r",
+							"    pm.expect(responseData.email).to.equal(\"blumbergh@example.com\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"'hashedPassword' Is Not Returned\", function () {\r",
+							"    pm.expect(responseData).to.not.have.property(\"hashedPassword\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"firstName\": \"Bill\",\r\n  \"lastName\": \"Lumbergh\",\r\n  \"email\": \"blumbergh@example.com\",\r\n  \"hashedPassword\": \"BLumberghMyPorsche456\",\r\n  \"checklist_ids\": [{{emptyChecklistId}}, {{checklistWithItemsId}}]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/users/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"users",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Users",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseData = pm.response.json();\r",
+							"\r",
+							"const pGibbonsId = parseInt(pm.environment.get(\"pGibbonsUserId\"));\r",
+							"const bLumberghId = parseInt(pm.environment.get(\"bLumberghUserId\"));\r",
+							"\r",
+							"const expectedUsers = [\r",
+							"    {\r",
+							"        id: pGibbonsId,\r",
+							"        firstName: \"Peter\",\r",
+							"        lastName: \"Gibbons\",\r",
+							"        email: \"pgibbons@example.com\",\r",
+							"        checklist_ids: []\r",
+							"    },\r",
+							"    {\r",
+							"        id: bLumberghId,\r",
+							"        firstName: \"Bill\",\r",
+							"        lastName: \"Lumbergh\",\r",
+							"        email: \"blumbergh@example.com\",\r",
+							"        checklist_ids: [\r",
+							"            parseInt(pm.environment.get(\"emptyChecklistId\")),\r",
+							"            parseInt(pm.environment.get(\"checklistWithItemsId\"))\r",
+							"        ]\r",
+							"    }\r",
+							"];\r",
+							"\r",
+							"pm.test(\"Status Code Is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"All Expected Users Are Present and Have Correct Data\", function () {\r",
+							"    expectedUsers.forEach(expectedUser => {\r",
+							"        const actualUser = responseData.find(user => user.id === expectedUser.id);\r",
+							"        pm.expect(actualUser).to.be.ok;\r",
+							"        pm.expect(actual.firstName).to.equal(expected.firstName);\r",
+							"        pm.expect(actual.lastName).to.equal(expected.lastName);\r",
+							"        pm.expect(actual.email).to.equal(expected.email);\r",
+							"        pm.expect(actual.checklist_ids.sort()).to.equal(expected.checklist_ids.sort());\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"pm.test(\"No Unexpected Users Are Returned\", function () {\r",
+							"    const expectedUserIds = expectedUsers.map(user => user.id);\r",
+							"    const actualUserIds = responseData.map(user => user.id);\r",
+							"    pm.expect(actualUserIds.sort()).to.equal(expectedUserIds.sort());\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/users",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get a User (User Exists)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseData = pm.response.json();\r",
+							"\r",
+							"const emptyChecklistId = parseInt(pm.environment.get(\"emptyChecklistId\"));\r",
+							"const checklistWithItemsId = parseInt(pm.environment.get(\"checklistWithItemsId\"));\r",
+							"const expectedChecklistIds = [emptyChecklistId, checklistWithItemsId];\r",
+							"\r",
+							"pm.test(\"Status Code Is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"User Has Correct Data\", function () {    \r",
+							"    pm.expect(responseData.id).to.equal(parseInt(pm.environment.get(\"bLumberghUserId\")));\r",
+							"    pm.expect(responseData.firstName).to.equal(\"Bill\");\r",
+							"    pm.expect(responseData.lastName).to.equal(\"Lumbergh\");\r",
+							"    pm.expect(responseData.email).to.equal(\"blumbergh@example.com\");    \r",
+							"    pm.expect(responseData.checklist_ids.sort()).to.equal(expectedChecklistIds.sort());    \r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/users/{{bLumberghUserId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"users",
+						"{{bLumberghUserId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get a User (User DNE)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status Code Is 404\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/users/100",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"users",
+						"100"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
