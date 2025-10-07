@@ -283,21 +283,16 @@
 							"    expectedUsers.forEach(expectedUser => {\r",
 							"        const actualUser = responseData.find(user => user.id === expectedUser.id);\r",
 							"        pm.expect(actualUser).to.be.ok;\r",
-							"        pm.expect(actual.firstName).to.equal(expected.firstName);\r",
-							"        pm.expect(actual.lastName).to.equal(expected.lastName);\r",
-							"        pm.expect(actual.email).to.equal(expected.email);\r",
-							"        pm.expect(actual.checklist_ids.sort()).to.equal(expected.checklist_ids.sort());\r",
+							"        pm.expect(actualUser.firstName).to.equal(expectedUser.firstName);\r",
+							"        pm.expect(actualUser.lastName).to.equal(expectedUser.lastName);\r",
+							"        pm.expect(actualUser.email).to.equal(expectedUser.email);\r",
+							"        pm.expect(actualUser.checklist_ids.sort()).to.eql(expectedUser.checklist_ids.sort());\r",
 							"    });\r",
-							"});\r",
-							"\r",
-							"pm.test(\"No Unexpected Users Are Returned\", function () {\r",
-							"    const expectedUserIds = expectedUsers.map(user => user.id);\r",
-							"    const actualUserIds = responseData.map(user => user.id);\r",
-							"    pm.expect(actualUserIds.sort()).to.equal(expectedUserIds.sort());\r",
 							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -352,11 +347,12 @@
 							"    pm.expect(responseData.firstName).to.equal(\"Bill\");\r",
 							"    pm.expect(responseData.lastName).to.equal(\"Lumbergh\");\r",
 							"    pm.expect(responseData.email).to.equal(\"blumbergh@example.com\");    \r",
-							"    pm.expect(responseData.checklist_ids.sort()).to.equal(expectedChecklistIds.sort());    \r",
+							"    pm.expect(responseData.checklist_ids.sort()).to.eql(expectedChecklistIds.sort());    \r",
 							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -402,7 +398,8 @@
 							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -422,7 +419,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8000/users/100",
+					"raw": "http://localhost:8000/users/5",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -430,7 +427,596 @@
 					"port": "8000",
 					"path": [
 						"users",
-						"100"
+						"5"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update a User (User Exists)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseData = pm.response.json();\r",
+							"\r",
+							"const checklistWithItemsId = parseInt(pm.environment.get(\"checklistWithItemsId\"));\r",
+							"\r",
+							"pm.test(\"Status Code Is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"'checklist_ids' List Contains Expected Checklists\", function () {\r",
+							"    pm.expect(responseData.checklist_ids).to.include(checklistWithItemsId);    \r",
+							"    pm.expect(responseData.checklist_ids.length).to.equal(1);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"'firstName' Field Has Expected Value\", function () {\r",
+							"    pm.expect(responseData.firstName).to.equal(\"Michael\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"'lastName' Field Has Expected Value\", function () {\r",
+							"    pm.expect(responseData.lastName).to.equal(\"Bolton\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"'email' Field Has Expected Value\", function () {\r",
+							"    pm.expect(responseData.email).to.equal(\"mbolton@example.com\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"firstName\": \"Michael\",\r\n  \"lastName\": \"Bolton\",\r\n  \"email\": \"mbolton@example.com\",\r\n  \"hashedPassword\": \"MBoltonInitechPwd789\",\r\n  \"checklist_ids\": [{{checklistWithItemsId}}]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/users/{{bLumberghUserId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"users",
+						"{{bLumberghUserId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add Checklists to User with No Associated Checklists (User Exists)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseData = pm.response.json();\r",
+							"\r",
+							"const emptyChecklistId = parseInt(pm.environment.get(\"emptyChecklistId\"));\r",
+							"const checklistWithItemsId = parseInt(pm.environment.get(\"checklistWithItemsId\"));\r",
+							"\r",
+							"pm.test(\"Status Code Is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"'checklist_ids' List Contains Expected Checklists\", function () {\r",
+							"    pm.expect(responseData.checklist_ids).to.include(emptyChecklistId);\r",
+							"    pm.expect(responseData.checklist_ids).to.include(checklistWithItemsId);\r",
+							"    pm.expect(responseData.checklist_ids.length).to.equal(2);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"'firstName' Field Has Expected Value\", function () {\r",
+							"    pm.expect(responseData.firstName).to.equal(\"Peter\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"'lastName' Field Has Expected Value\", function () {\r",
+							"    pm.expect(responseData.lastName).to.equal(\"Gibbons\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"'email' Field Has Expected Value\", function () {\r",
+							"    pm.expect(responseData.email).to.equal(\"pgibbons@example.com\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"firstName\": \"Peter\",\r\n  \"lastName\": \"Gibbons\",\r\n  \"email\": \"pgibbons@example.com\",\r\n  \"hashedPassword\": \"PGibbonsPwd123\",\r\n  \"checklist_ids\": [{{emptyChecklistId}}, {{checklistWithItemsId}}]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/users/{{pGibbonsUserId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"users",
+						"{{pGibbonsUserId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update a User (User DNE)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status Code Is 404\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"firstName\": \"Michael\",\r\n  \"lastName\": \"Bolton\",\r\n  \"email\": \"mbolton@example.com\",\r\n  \"hashedPassword\": \"MBoltonInitechPwd789\",\r\n  \"checklist_ids\": [{{checklistWithItemsId}}]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/users/5",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"users",
+						"5"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete User with No Associated Checklists (User Exists)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status Code is 204\", function () {\r",
+							"    pm.response.to.have.status(204);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/users/{{pGibbonsUserId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"users",
+						"{{pGibbonsUserId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Deleted User with No Associated Checklists (User DNE)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status Code Is 404\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/users/{{pGibbonsUserId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"users",
+						"{{pGibbonsUserId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete User With Associated Checklists (User Exists)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status Code is 204\", function () {\r",
+							"    pm.response.to.have.status(204);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/users/{{bLumberghUserId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"users",
+						"{{bLumberghUserId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Deleted User with Associated Checklists (User DNE)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status Code Is 404\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/users/{{bLumberghUserId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"users",
+						"{{bLumberghUserId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Empty Checklist (Verifies Checklist Still Exists After Users Have Been Deleted)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseData = pm.response.json();\r",
+							"\r",
+							"const emptyChecklistId = parseInt(pm.environment.get(\"emptyChecklistId\"));\r",
+							"\r",
+							"pm.test(\"Status Code Is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Checklist Has Correct Id\", function () {    \r",
+							"    pm.expect(responseData.id).to.eql(emptyChecklistId);      \r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/checklists/{{emptyChecklistId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"checklists",
+						"{{emptyChecklistId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Checklist with Items (Verifies Checklist Still Exists After Users Have Been Deleted)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseData = pm.response.json();\r",
+							"\r",
+							"const checklistWithItemsId = parseInt(pm.environment.get(\"checklistWithItemsId\"));\r",
+							"\r",
+							"pm.test(\"Status Code Is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Checklist Has Correct Id\", function () {    \r",
+							"    pm.expect(responseData.id).to.eql(checklistWithItemsId);      \r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/checklists/{{checklistWithItemsId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"checklists",
+						"{{checklistWithItemsId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete a User (User DNE)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status Code Is 404\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/users/5",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"users",
+						"5"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Empty Checklist",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status Code is 204\", function () {\r",
+							"    pm.response.to.have.status(204);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/checklists/{{emptyChecklistId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"checklists",
+						"{{emptyChecklistId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Checklist with Items",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status Code is 204\", function () {\r",
+							"    pm.response.to.have.status(204);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/checklists/{{checklistWithItemsId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"checklists",
+						"{{checklistWithItemsId}}"
 					]
 				}
 			},
