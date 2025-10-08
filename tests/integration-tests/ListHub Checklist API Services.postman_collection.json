@@ -13,17 +13,26 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"const jsonResponse = JSON.parse(pm.response.text());\r",
+							"const responseData = pm.response.json();\r",
 							"\r",
-							"const emptyChecklistId = jsonResponse.id;\r",
+							"const emptyChecklistId = responseData.id;\r",
 							"pm.environment.set(\"emptyChecklistId\", emptyChecklistId); \r",
 							"\r",
-							"pm.test(\"Create Empty Checklist\", function () {\r",
-							"        pm.response.to.have.status(201);\r",
-							"    });"
+							"pm.test(\"Status Code Is 201\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"'title' Field Has Expected Value\", function () {\r",
+							"    pm.expect(responseData.title).to.eql(\"My Empty Checklist\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"'items' List Is Empty\", function () {\r",
+							"    pm.expect(responseData.items).to.be.an(\"array\").that.is.empty;\r",
+							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -61,20 +70,42 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"const jsonResponse = JSON.parse(pm.response.text());\r",
+							"const responseData = pm.response.json();\r",
 							"\r",
-							"const checklistWithItemsId = jsonResponse.id;\r",
+							"const checklistWithItemsId = responseData.id;\r",
 							"pm.environment.set(\"checklistWithItemsId\", checklistWithItemsId); \r",
 							"\r",
-							"const firstItem = jsonResponse.items[0];\r",
+							"const firstItem = responseData.items[0];\r",
 							"pm.environment.set(\"firstItemId\", firstItem.id);\r",
 							"\r",
-							"pm.test(\"Create Checklist with Some Items\", function () {\r",
-							"        pm.response.to.have.status(201);\r",
-							"    });"
+							"const expectedChecklist = {\r",
+							"    title: \"New Checklist with Some Items\",\r",
+							"    items: [\r",
+							"        { text: \"task 1\", isComplete: false },\r",
+							"        { text: \"task 2\", isComplete: false },\r",
+							"        { text: \"task 3\", isComplete: false }\r",
+							"    ]\r",
+							"};\r",
+							"\r",
+							"pm.test(\"Status Code Is 201\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"'title' Field Has Expected Value\", function () {\r",
+							"    pm.expect(responseData.title).to.eql(\"New Checklist with Some Items\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Each Checklist Item Has Correct Text and isComplete Status\", function () {\r",
+							"    responseData.items.forEach((item, index) => {\r",
+							"        const expectedItem = expectedChecklist.items[index];\r",
+							"        pm.expect(item.text).to.eql(expectedItem.text);\r",
+							"        pm.expect(item.isComplete).to.eql(expectedItem.isComplete);\r",
+							"    });\r",
+							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -112,12 +143,51 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Get All Checklists\", function () {\r",
-							"        pm.response.to.have.status(200);\r",
-							"    });"
+							"const responseData = pm.response.json();\r",
+							"\r",
+							"const checklistWithItemsId = parseInt(pm.environment.get(\"checklistWithItemsId\"));\r",
+							"const emptyChecklistId = parseInt(pm.environment.get(\"emptyChecklistId\"));\r",
+							"\r",
+							"const expectedChecklists = [\r",
+							"    {\r",
+							"        id: checklistWithItemsId,\r",
+							"        title: \"New Checklist with Some Items\",\r",
+							"        items: [\r",
+							"            { text: \"task 1\", isComplete: false },\r",
+							"            { text: \"task 2\", isComplete: false },\r",
+							"            { text: \"task 3\", isComplete: false }\r",
+							"        ]\r",
+							"    },\r",
+							"    {\r",
+							"        id: emptyChecklistId,\r",
+							"        title: \"My Empty Checklist\",\r",
+							"        items: []\r",
+							"    }\r",
+							"];\r",
+							"\r",
+							"pm.test(\"Status Code Is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"All Expected Checklists Are Present and Have Correct Data\", function () {\r",
+							"    expectedChecklists.forEach(expectedChecklist => {\r",
+							"        const actualChecklist = responseData.find(checklist => checklist.id === expectedChecklist.id);        \r",
+							"        pm.expect(actualChecklist.title).to.eql(expectedChecklist.title);\r",
+							"        pm.expect(actualChecklist.items.length).to.eql(expectedChecklist.items.length);\r",
+							"        \r",
+							"        if (expectedChecklist.items.length > 0) {\r",
+							"            expectedChecklist.items.forEach((expectedItem, index) => {\r",
+							"                const actualItem = actualChecklist.items[index];\r",
+							"                pm.expect(actualItem.text).to.eql(expectedItem.text);\r",
+							"                pm.expect(actualItem.isComplete).to.eql(expectedItem.isComplete);\r",
+							"            });\r",
+							"        }\r",
+							"    });\r",
+							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -145,12 +215,39 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Get a Checklist (Checklist Exists)\", function () {\r",
-							"        pm.response.to.have.status(200);\r",
-							"    });"
+							"const responseData = pm.response.json();\r",
+							"\r",
+							"const checklistWithItemsId = parseInt(pm.environment.get(\"checklistWithItemsId\"));\r",
+							"\r",
+							"const expectedChecklist = {\r",
+							"    title: \"New Checklist with Some Items\",\r",
+							"    items: [\r",
+							"        { text: \"task 1\", isComplete: false },\r",
+							"        { text: \"task 2\", isComplete: false },\r",
+							"        { text: \"task 3\", isComplete: false }\r",
+							"    ]\r",
+							"};\r",
+							"\r",
+							"pm.test(\"Status Code Is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Checklist Has Correct Data\", function () {    \r",
+							"    pm.expect(responseData.id).to.eql(checklistWithItemsId);\r",
+							"    pm.expect(responseData.title).to.eql(expectedChecklist.title);\r",
+							"\r",
+							"    if (expectedChecklist.items.length > 0) {\r",
+							"        responseData.items.forEach((item, index) => {\r",
+							"            const expectedItem = expectedChecklist.items[index];\r",
+							"            pm.expect(item.text).to.eql(expectedItem.text);\r",
+							"            pm.expect(item.isComplete).to.eql(expectedItem.isComplete);\r",
+							"        });\r",
+							"    }   \r",
+							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -179,12 +276,13 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Get a Checklist (Checklist DNE)\", function () {\r",
-							"        pm.response.to.have.status(404);\r",
-							"    });"
+							"pm.test(\"Status Code is 404\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -225,12 +323,13 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Get Checklist Items (Checklist DNE)\", function () {\r",
-							"        pm.response.to.have.status(404);\r",
-							"    });"
+							"pm.test(\"Status Code Is 404\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -260,12 +359,13 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Get Checklist Items (Checklist Exists)\", function () {\r",
+							"pm.test(\"Status Code Is 200\", function () {\r",
 							"        pm.response.to.have.status(200);\r",
-							"    });"
+							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -295,12 +395,13 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Get a Checklist Item (Item Exists in Checklist)\", function () {\r",
-							"        pm.response.to.have.status(200);\r",
-							"    });"
+							"pm.test(\"Status Code Is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -331,12 +432,13 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Get a Checklist Item (Item DNE in Checklist)\", function () {\r",
-							"        pm.response.to.have.status(404);\r",
-							"    });"
+							"pm.test(\"Status Code Is 404\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -367,7 +469,7 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"let checklist = pm.response.json();\r",
+							"const checklist = pm.response.json();\r",
 							"\r",
 							"if (checklist.items && checklist.items.length > 0) {\r",
 							"    checklist.items.forEach((item, index) => {\r",
@@ -375,22 +477,23 @@
 							"    });\r",
 							"}\r",
 							"\r",
-							"pm.test(\"First item has correct initial values\", function () {\r",
+							"pm.test(\"First Item Has Correct Initial Values\", function () {\r",
 							"    pm.expect(checklist.items[0].text).to.eql(\"New Item 1\");\r",
 							"    pm.expect(checklist.items[0].isComplete).to.eql(false);\r",
 							"});\r",
 							"\r",
-							"pm.test(\"Second item has correct initial values\", function () {\r",
+							"pm.test(\"Second Item Has Correct Initial Values\", function () {\r",
 							"    pm.expect(checklist.items[1].text).to.eql(\"New Item 2\");\r",
 							"    pm.expect(checklist.items[1].isComplete).to.eql(false);\r",
 							"});\r",
 							"\r",
-							"pm.test(\"Add Items to Checklist (Checklist Exists)\", function () {\r",
-							"        pm.response.to.have.status(200);\r",
+							"pm.test(\"Status Code Is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
 							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -428,26 +531,27 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"let checklist = pm.response.json();\r",
+							"const checklist = pm.response.json();\r",
 							"\r",
-							"pm.test(\"Item 1 text and isComplete are correct\", function () {\r",
+							"pm.test(\"Item 1 Text and isComplete Are Correct\", function () {\r",
 							"    pm.expect(checklist.items[0].id).to.eql(parseInt(pm.environment.get(\"itemId1\")));\r",
 							"    pm.expect(checklist.items[0].text).to.eql(\"updated item 1\");\r",
 							"    pm.expect(checklist.items[0].isComplete).to.eql(false);\r",
 							"});\r",
 							"\r",
-							"pm.test(\"Item 2 text and isComplete are correct\", function () {\r",
+							"pm.test(\"Item 2 Text and isComplete Are Correct\", function () {\r",
 							"    pm.expect(checklist.items[1].id).to.eql(parseInt(pm.environment.get(\"itemId2\")));\r",
 							"    pm.expect(checklist.items[1].text).to.eql(\"updated item 2\");\r",
 							"    pm.expect(checklist.items[1].isComplete).to.eql(true);\r",
 							"});\r",
 							"\r",
-							"pm.test(\"Update Items in Checklist (Checklist Exists)\", function () {\r",
-							"        pm.response.to.have.status(200);\r",
+							"pm.test(\"Status Code Is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
 							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -485,29 +589,30 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"let checklist = pm.response.json();\r",
+							"const checklist = pm.response.json();\r",
 							"\r",
-							"pm.test(\"Checklist contains 1 item\", function () {\r",
+							"pm.test(\"Checklist Contains 1 Item\", function () {\r",
 							"    pm.expect(checklist.items.length).to.eql(1);\r",
 							"});\r",
 							"\r",
-							"pm.test(\"Remaining item is Item 2\", function () {\r",
+							"pm.test(\"Remaining Item Is Item 2\", function () {\r",
 							"    pm.expect(checklist.items[0].id).to.eql(parseInt(pm.environment.get(\"itemId2\")));\r",
 							"    pm.expect(checklist.items[0].text).to.eql(\"updated item 2\");\r",
 							"    pm.expect(checklist.items[0].isComplete).to.eql(true);\r",
 							"});\r",
 							"\r",
-							"pm.test(\"Item 1 has been removed\", function () {\r",
+							"pm.test(\"Item 1 Has Been Removed\", function () {\r",
 							"    let item1 = checklist.items.find(item => item.id === parseInt(pm.environment.get(\"itemId1\")));\r",
 							"    pm.expect(item1).to.eql(undefined);\r",
 							"});\r",
 							"\r",
-							"pm.test(\"Remove Item from Checklist (Checklist Exists)\", function () {\r",
-							"        pm.response.to.have.status(200);\r",
+							"pm.test(\"Status Code Is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
 							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -545,24 +650,25 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"let checklist = pm.response.json();\r",
+							"const checklist = pm.response.json();\r",
 							"\r",
-							"pm.test(\"Checklist title has been updated\", function () {\r",
+							"pm.test(\"Checklist Title Has Been Updated\", function () {\r",
 							"    pm.expect(checklist.title).to.eql(\"Updated Checklist Title\");\r",
 							"});\r",
 							"\r",
-							"pm.test(\"Existing item is unchanged\", function () {\r",
+							"pm.test(\"Existing Item Is Unchanged\", function () {\r",
 							"    pm.expect(checklist.items[0].id).to.eql(parseInt(pm.environment.get(\"itemId2\")));\r",
 							"    pm.expect(checklist.items[0].text).to.eql(\"updated item 2\");\r",
 							"    pm.expect(checklist.items[0].isComplete).to.eql(true);\r",
 							"});\r",
 							"\r",
-							"pm.test(\"Update Checklist Title (Checklist Exists)\", function () {\r",
-							"        pm.response.to.have.status(200);\r",
+							"pm.test(\"Status Code Is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
 							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -600,12 +706,13 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Update Checklist Title (Checklist DNE)\", function () {\r",
-							"        pm.response.to.have.status(404);\r",
-							"    });"
+							"pm.test(\"Status Code Is 404\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -643,12 +750,13 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Update Checklist Item (Item Exists in Checklist)\", function () {\r",
-							"        pm.response.to.have.status(200);\r",
-							"    });"
+							"pm.test(\"Status Code Is 200)\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -688,12 +796,13 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Update Checklist Item (Item DNE in Checklist)\", function () {\r",
-							"        pm.response.to.have.status(404);\r",
-							"    });"
+							"pm.test(\"Status Code Is 404\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -733,17 +842,53 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Delete Empty Checklist (Checklist Exists)\", function () {\r",
-							"        pm.response.to.have.status(204);\r",
-							"    });"
+							"pm.test(\"Status Code is 204\", function () {\r",
+							"    pm.response.to.have.status(204);\r",
+							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
 			"request": {
 				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/checklists/{{emptyChecklistId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"checklists",
+						"{{emptyChecklistId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Deleted Empty Checklist (Checklist DNE)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status Code Is 404\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
 				"header": [],
 				"url": {
 					"raw": "http://localhost:8000/checklists/{{emptyChecklistId}}",
@@ -767,12 +912,13 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Delete Empty Checklist (Checklist DNE)\", function () {\r",
-							"        pm.response.to.have.status(404);\r",
-							"    });"
+							"pm.test(\"Status Code is 404\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -801,17 +947,55 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Delete Item from Checklist (Item Exists in Checklist)\", function () {\r",
-							"        pm.response.to.have.status(204);\r",
-							"    });"
+							"pm.test(\"Status Code is 204\", function () {\r",
+							"    pm.response.to.have.status(204);\r",
+							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
 			"request": {
 				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/checklists/{{checklistWithItemsId}}/items/{{firstItemId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"checklists",
+						"{{checklistWithItemsId}}",
+						"items",
+						"{{firstItemId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Deleted Item from Checklist (Item DNE in Checklist)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status Code Is 404\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
 				"header": [],
 				"url": {
 					"raw": "http://localhost:8000/checklists/{{checklistWithItemsId}}/items/{{firstItemId}}",
@@ -837,12 +1021,13 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Delete Item from Checklist (Item DNE in Checklist))\", function () {\r",
-							"        pm.response.to.have.status(404);\r",
-							"    });"
+							"pm.test(\"Status Code Is 404\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -873,17 +1058,53 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Delete Checklist with Items (Checklist Exists)\", function () {\r",
-							"        pm.response.to.have.status(204);\r",
-							"    });"
+							"pm.test(\"Status Code Is 204\", function () {\r",
+							"    pm.response.to.have.status(204);\r",
+							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
 			"request": {
 				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/checklists/{{checklistWithItemsId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"checklists",
+						"{{checklistWithItemsId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Deleted Checklist with Items (Checklist DNE)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status Code Is 404\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
 				"header": [],
 				"url": {
 					"raw": "http://localhost:8000/checklists/{{checklistWithItemsId}}",
